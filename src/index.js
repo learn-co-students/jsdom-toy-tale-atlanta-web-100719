@@ -103,5 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
       div.appendChild(makeCard(toy))
     })
     // reset
+    event.target.reset()
   })
 })
