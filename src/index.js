@@ -1,41 +1,5 @@
 let addToy = false
 
-async function postData(url = '', data = {}) {
-  // Default options are marked with *
-  const response = await fetch(url, {
-    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-    mode: 'cors', // no-cors, *cors, same-origin
-    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    credentials: 'same-origin', // include, *same-origin, omit
-    headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    redirect: 'follow', // manual, *follow, error
-    referrer: 'no-referrer', // no-referrer, *client
-    body: JSON.stringify(data) // body data type must match "Content-Type" header
-  });
-  return await response.json(); // parses JSON response into native JavaScript objects
-}
-
-async function patchData(url = '', data = {}) {
-  // Default options are marked with *
-  const response = await fetch(url, {
-    method: 'PATCH', // *GET, POST, PUT, DELETE, etc.
-    mode: 'cors', // no-cors, *cors, same-origin
-    cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    credentials: 'same-origin', // include, *same-origin, omit
-    headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    redirect: 'follow', // manual, *follow, error
-    referrer: 'no-referrer', // no-referrer, *client
-    body: JSON.stringify(data) // body data type must match "Content-Type" header
-  });
-  return await response.json(); // parses JSON response into native JavaScript objects
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   const addBtn = document.querySelector('#new-toy-btn')
   const toyForm = document.querySelector('.container')
@@ -83,10 +47,11 @@ document.addEventListener("DOMContentLoaded", () => {
       let likes = p.innerText.split(' ')[0]
 
       //update data
-      let updatedCard = patchData('http://localhost:3000/toys/' + toy.id, { "likes": ++likes })
-      updatedCard.then((toy) => {
-        p.innerText = toy.likes + ' Likes'
-      })
+      let patchResponse = fetch('http://localhost:3000/toys/' + toy.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "likes": ++likes }) })
+        .then(res => res.json())
+        .then((toy) => {
+          p.innerText = toy.likes + ' Likes'
+        })
     })
     return card
   }
@@ -97,11 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // prevent default
     event.preventDefault()
     // post it
-    let newToy = postData('http://localhost:3000/toys', { name: event.target.name.value, image: event.target.image.value, likes: 0 })
-    // add a card
-    newToy.then(toy => {
-      div.appendChild(makeCard(toy))
+    const postResponse = fetch('http://localhost:3000/toys', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: event.target.name.value, image: event.target.image.value, likes: 0 })
     })
+      .then(res => res.json())
+      .then(toy => div.appendChild(makeCard(toy)))
     // reset
     event.target.reset()
   })
